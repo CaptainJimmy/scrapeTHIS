@@ -22,7 +22,9 @@ var app = express();
 // Use morgan logger for logging requests
 app.use(logger('dev'));
 // Use body-parser for handling form submissions
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static('public'));
 
@@ -36,38 +38,67 @@ mongoose.connect('mongodb://localhost/week18Populater', {
 // Routes
 
 // A GET route for scraping the echojs website
-app.get('/scrape', function(req, res) {
-    // First, we grab the body of the html with request
-    axios.get('http://www.echojs.com/').then(function(response) {
-        // Then, we load that into cheerio and save it to $ for a shorthand selector
+// app.get('/scrape', function(req, res) {
+//     // First, we grab the body of the html with request
+//     axios.get('http://www.echojs.com/').then(function(response) {
+//         // Then, we load that into cheerio and save it to $ for a shorthand selector
+//         var $ = cheerio.load(response.data);
+//         // Now, we grab every h2 within an article tag, and do the following:
+//         $('article h2').each(function(i, element) {
+//             // Save an empty result object
+//             var result = {};
+
+//             // Add the text and href of every link, and save them as properties of the result object
+//             result.title = $(this)
+//                 .children('a')
+//                 .text();
+//             result.link = $(this)
+//                 .children('a')
+//                 .attr('href');
+
+//             // Create a new Article using the `result` object built from scraping
+//             db.Article.create(result)
+//                 .then(function(dbArticle) {
+//                     // If we were able to successfully scrape and save an Article, send a message to the client
+//                     res.send('Scrape Complete');
+//                 })
+//                 .catch(function(err) {
+//                     // If an error occurred, send it to the client
+//                     res.json(err);
+//                 });
+//         });
+//     });
+//});
+app.get('/scrape/:id', function(req, res, next) {
+    var reddit = req.params.id;
+    var board = encodeURI("https://reddit.com/r/" + reddit)
+    axios.get(board).then(function(response) {
         var $ = cheerio.load(response.data);
-        // Now, we grab every h2 within an article tag, and do the following:
-        $('article h2').each(function(i, element) {
-            // Save an empty result object
+
+        $('p.title').each(function(i, element) {
             var result = {};
 
-            // Add the text and href of every link, and save them as properties of the result object
-            result.title = $(this)
-                .children('a')
-                .text();
-            result.link = $(this)
-                .children('a')
-                .attr('href');
-
-            // Create a new Article using the `result` object built from scraping
+            result.reddit = reddit
+            result.title = $(this).children('a').text();
+            result.link = $(this).children('a').attr('href');
             db.Article.create(result)
                 .then(function(dbArticle) {
                     // If we were able to successfully scrape and save an Article, send a message to the client
                     res.send('Scrape Complete');
                 })
                 .catch(function(err) {
-                    // If an error occurred, send it to the client
-                    res.json(err);
+                    //res.json(err);
+                    console.log("FIJWIJFEIEFW")
+                    console.log(err)
                 });
         });
-    });
+    }).catch(err => {
+        if (err.response) {
+            console.log(err.response);
+            res.send(err);
+        }
+    })
 });
-
 // Route for getting all Articles from the db
 app.get('/articles', function(req, res) {
     // TODO: Finish the route so it grabs all of the articles
@@ -76,7 +107,7 @@ app.get('/articles', function(req, res) {
             res.json(articles);
         })
         .catch(function(err) {
-            res.json(err);
+            res.json(err)
         });
 });
 
@@ -88,7 +119,9 @@ app.get('/articles/:id', function(req, res) {
     // and run the populate method with "note",
     // then responds with the article with the note included
     // findOne returns object, find returns array of objects (this is important for how you handle your data on the front end)
-    db.Article.findOne({ _id: req.params.id })
+    db.Article.findOne({
+            _id: req.params.id
+        })
         .populate('note')
         .then(function(article) {
             res.json(article);
@@ -108,7 +141,15 @@ app.post('/articles/:id', function(req, res) {
     db.Note.create(req.body)
         .then(function(dbNote) {
             // Take returned note and push it's _id into Articles.note array. Set new: true so it returns updated Article and not old one
-            return db.Article.findOneAndUpdate({ _id: req.params.id }, { $push: { note: dbNote._id } }, { new: true });
+            return db.Article.findOneAndUpdate({
+                _id: req.params.id
+            }, {
+                $push: {
+                    note: dbNote._id
+                }
+            }, {
+                new: true
+            });
         })
         .then(function(dbArticle) {
             res.json(dbArticle);
