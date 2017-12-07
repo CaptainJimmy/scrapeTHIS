@@ -30,4 +30,4 @@ var FavoriteSchema = new Schema({
 var Favorite = mongoose.model("Favorite", FavoriteSchema);
 
 // Export the Article model
-module.exports = Article;
+module.exports = Favorite;

@@ -37,68 +37,81 @@ mongoose.connect('mongodb://localhost/week18Populater', {
 
 // Routes
 
-// A GET route for scraping the echojs website
-// app.get('/scrape', function(req, res) {
-//     // First, we grab the body of the html with request
-//     axios.get('http://www.echojs.com/').then(function(response) {
-//         // Then, we load that into cheerio and save it to $ for a shorthand selector
-//         var $ = cheerio.load(response.data);
-//         // Now, we grab every h2 within an article tag, and do the following:
-//         $('article h2').each(function(i, element) {
-//             // Save an empty result object
-//             var result = {};
 
-//             // Add the text and href of every link, and save them as properties of the result object
-//             result.title = $(this)
-//                 .children('a')
-//                 .text();
-//             result.link = $(this)
-//                 .children('a')
-//                 .attr('href');
-
-//             // Create a new Article using the `result` object built from scraping
-//             db.Article.create(result)
-//                 .then(function(dbArticle) {
-//                     // If we were able to successfully scrape and save an Article, send a message to the client
-//                     res.send('Scrape Complete');
-//                 })
-//                 .catch(function(err) {
-//                     // If an error occurred, send it to the client
-//                     res.json(err);
-//                 });
-//         });
-//     });
-//});
-app.get('/scrape/:id', function(req, res, next) {
+app.get("/scrape/:id", function(req, res) {
+    // First, we grab the body of the html with request
     var reddit = req.params.id;
     var board = encodeURI("https://reddit.com/r/" + reddit)
     axios.get(board).then(function(response) {
+        // Then, we load that into cheerio and save it to $ for a shorthand selector
         var $ = cheerio.load(response.data);
 
-        $('p.title').each(function(i, element) {
+        // Now, we grab every h2 within an article tag, and do the following:
+        $("p.title").each(function(i, element) {
+            // Save an empty result object
             var result = {};
 
-            result.reddit = reddit
-            result.title = $(this).children('a').text();
-            result.link = $(this).children('a').attr('href');
+            // Add the text and href of every link, and save them as properties of the result object
+            result.title = $(this)
+                .children("a")
+                .text();
+            result.link = $(this)
+                .children("a")
+                .attr("href");
+
+            // Create a new Article using the `result` object built from scraping
             db.Article.create(result)
                 .then(function(dbArticle) {
                     // If we were able to successfully scrape and save an Article, send a message to the client
-                    res.send('Scrape Complete');
+                    console.log('scrape complete', dbArticle);
                 })
                 .catch(function(err) {
-                    //res.json(err);
-                    console.log("FIJWIJFEIEFW")
-                    console.log(err)
+                    // If an error occurred, send it to the client
+                    res.json(err);
                 });
         });
-    }).catch(err => {
-        if (err.response) {
-            console.log(err.response);
-            res.send(err);
-        }
-    })
+        res.send('Scrape Complete');
+    });
 });
+// app.get('/scrape/:id', function(req, res, next) {
+//     var reddit = req.params.id;
+//     var board = encodeURI("https://reddit.com/r/" + reddit)
+//     axios.get(board).then(function(response) {
+//         var timestamp = new Date()
+//         console.log(timestamp)
+//         var $ = cheerio.load(response.data);
+
+//         console.log(`here ${timestamp}`)
+//         var result = {};
+//         result.reddit = reddit
+//         $('p.title').each((i, element) => {
+//                 //console.log(element)
+//                 var articles = {}
+//                 console.log($(this).children('a').text())
+//                 console.log($(this).children('a').attr('href'))
+//                 articles.title = $(this).children('a').text();
+//                 articles.link = $(this).children('a').attr('href')
+//                 console.log(`each ${timestamp}`)
+//                 console.log(articles)
+//                 result.articles.push(articles);
+//                 db.Article.create(result)
+//                     .done(function(dbArticle) {
+//                         // If we were able to successfully scrape and save an Article, send a message to the client
+//                         res.send('Scrape Complete');
+//                     });
+//                 // }).Promise(result => {
+//                 //     res.send(result);
+//                 //     console.log(JSON.stringify(result))
+
+
+//             })
+//             // .catch(err => {
+//             //     if (err.response) {
+//             //         console.log(err.response);
+//             //         res.send(err);
+
+//     })
+// });
 // Route for getting all Articles from the db
 app.get('/articles', function(req, res) {
     // TODO: Finish the route so it grabs all of the articles

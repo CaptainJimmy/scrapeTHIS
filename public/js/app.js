@@ -23,21 +23,37 @@ $(document).on("click", "p", function() {
         // With that done, add the note information to the page
         .done(function(data) {
             console.log(data);
-            // The title of the article
-            $("#notes").append("<h2>" + data.title + "</h2>");
-            // An input to enter a new title
-            $("#notes").append("<input id='titleinput' name='title' >");
-            // A textarea to add a new note body
-            $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
-            // A button to submit a new note, with the id of the article saved to it
-            $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
+            $("#notes").append(
+                $('<h2>').text(data.title),
+                $('<input>').attr({
+                    'id': 'titleinput',
+                    "name": 'title'
+                }),
+                $('<textarea>').attr({
+                    'id': 'bodyinput',
+                    'name': 'body'
+                }),
+                $("<button>").attr({
+                    "data-id": data,
+                    "id": 'savenote',
+                    "type": "submit"
+                }).addClass("btn btn-danger")
+                .text("Save Note")
+            )
 
             // If there's a note in the article
             if (data.note) {
+                data.note.forEach(element => {
+                    $("#titleinput").append(
+                            $('<div>').html(
+                                $('<p>').text(element.title),
+                                $('<p>').text(element.body)
+                            )
+                        )
+                        // Place the body of the note in the body textarea
+                });
                 // Place the title of the note in the title input
-                $("#titleinput").val(data.note.title);
-                // Place the body of the note in the body textarea
-                $("#bodyinput").val(data.note.body);
+
             }
         });
 });
