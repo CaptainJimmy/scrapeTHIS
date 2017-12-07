@@ -11,30 +11,44 @@
 
     <title>ScrapeTHIS, FOol!!!</title>
 
+
 </head>
 
 <body>
     <div class="container-fluid">
         <div id="jumbotron">
-            <h1> ScrapeTHIS!!!</h1>
-            <h2>3r23234r3r42</h2>
+            <h1 class="text-center"> ScrapeTHIS!!!</h1>
+            <div>
+                <p class="hidden" id="#messages"></p>
+            </div>
         </div>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6">
-                    <div id="articles">
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-4">
+                <div id="articles">
 
-                    </div>
                 </div>
-                <div class="col-md-6">
-                    <div id="notes">
+            </div>
+            <div class="col-xs-4">
+                <div id="notes">
 
-                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <div id="stickies">
+
                 </div>
             </div>
         </div>
-        <script src="/js/app.js"></script>
     </div>
+    <script src="/js/app.js"></script>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('[data-toggle="popover"]').popover();
+        });
+    </script>
 </body>
 
 </html>
