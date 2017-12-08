@@ -149,10 +149,12 @@ app.post('/articles/:id', function(req, res) {
             res.json(err);
         });
 });
-//route for getting articles based on reddit
-
-
-// Start the server
+app.delete("/note/:id", function(req, res) {
+        db.Note.deleteOne({ _id: req.params.id }).then(function(data) {
+            res.json(data)
+        }).catch(err => res.json(err))
+    })
+    // Start the server
 app.listen(PORT, function() {
     console.log('App running on port ' + PORT + '!');
 });

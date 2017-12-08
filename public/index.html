@@ -18,12 +18,25 @@
     <div class="container-fluid">
         <div id="jumbotron">
             <h1 class="text-center"> ScrapeTHIS!!!</h1>
+            <h2 class="text-center">A Restful Web Scraper, Powered by MongoDB. Now with comments!</h2>
             <div>
-                <p class="hidden" id="#messages"></p>
+                <p id="#messages"></p>
             </div>
+
         </div>
     </div>
     <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs">
+                <div class="panel">
+
+                    <p class="panel-heading">Click for entries saved from these reddits:</p>
+
+                    <div class="panel-body" id="buttons">
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-xs-4">
                 <div id="articles">
@@ -46,7 +59,21 @@
     </div>
     <script>
         $(document).ready(function() {
-            $('[data-toggle="popover"]').popover();
+            $.ajax({
+                method: "GET",
+                url: "/reddit/distinct"
+            }).then(data => {
+                data.forEach(function(element) {
+                    console.log(element)
+                    $('#buttons').append(
+                        $("<button>").addClass("text-center btn btn-lg btn-danger redditButton").attr({
+                            "data-id": element
+                        }).text(element)
+                    )
+                })
+            })
+
+
         });
     </script>
 </body>

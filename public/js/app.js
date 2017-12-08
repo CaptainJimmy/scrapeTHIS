@@ -4,20 +4,19 @@ $.getJSON("/articles", function(data) {
         $("#articles").append(
             $('<div>').addClass("panel panel-default")
             .append(
-                $('<a>')
-                .attr({
-                    "href": "https://reddit.com" + data[i].link,
-                    "target": "_blank"
-                }).append($("<p>").attr({
-                    "data-id": data[i]._id
-                }).addClass("article panel-heading").text(data[i].link))
-            ),
-            $("<h3>").attr({
-                "data-id": data[i]._id,
-                "data-toggle": "popover",
-                "title": "Click to list notes made on this article",
-                "data-content": "Click to list notes made on this article"
-            }).addClass("article panel-body").text(data[i].title),
+                $('<div>').addClass("article panel-heading").append(
+                    $('<h4>').text(data[i].reddit),
+                    $('<a>').attr({
+                        "href": "https://reddit.com" + data[i].link,
+                        "target": "_blank"
+                    }).append($("<p>").attr({
+                        "data-id": data[i]._id
+                    }).addClass("article").text(data[i].link))
+                ),
+                $("<h3>").attr({
+                    "data-id": data[i]._id,
+                }).addClass("article panel-body").text(data[i].title),
+            )
 
         )
     }
@@ -61,7 +60,9 @@ $(document).on("click", ".article", function() {
                     $("#stickies").append(
                         $('<div>').addClass("panel panel-default").append(
                             $('<h3>').addClass("panel-heading").text(element.title),
-                            $('<h4>').addClass("panel-body").text(element.body)
+                            $('<h4>').addClass("panel-body").text(element.body).append(
+                                $('<button>').addClass("btn btn-default btn-sm deleteButton").attr({ "data-id": element._id }).append($('<span>').addClass("glyphicon glyphicon-remove"))
+                            )
                         )
                     )
                 });
@@ -89,3 +90,68 @@ $(document).on("click", "#savenote", function() {
     $("#titleinput").val("");
     $("#bodyinput").val("");
 });
+
+$(document).on("click", ".deleteButton", function() {
+    var thisID = $(this).attr("data-id");
+    console.log("delete this " + thisID)
+    $.ajax({
+        method: "DELETE",
+        url: "/note/" + thisID
+    }).then(function() {
+        $.getJSON("/articles", function(data) {
+            for (var i = 0; i < data.length; i++) {
+
+                $("#articles").append(
+                    $('<div>').addClass("panel panel-default")
+                    .append(
+                        $('<div>').addClass("article panel-heading").append(
+                            $('<h4>').text(data[i].reddit),
+                            $('<a>').attr({
+                                "href": "https://reddit.com" + data[i].link,
+                                "target": "_blank"
+                            }).append($("<p>").attr({
+                                "data-id": data[i]._id
+                            }).addClass("article").text(data[i].link))
+                        ),
+                        $("<h3>").attr({
+                            "data-id": data[i]._id,
+                        }).addClass("article panel-body").text(data[i].title),
+                    )
+
+                )
+            }
+        })
+    }).done(() => {
+        $('#stickies').empty();
+    })
+})
+$(document).on("click", ".redditButton", function() {
+    var thisReddit = $(this).attr("data-id");
+    $.ajax({
+        method: "GET",
+        url: "/reddit/" + thisReddit
+    }).then(data => {
+        $("#articles").empty();
+
+        data.forEach(turkey => {
+            $("#articles").append(
+                $('<div>').addClass("panel panel-default")
+                .append(
+                    $('<div>').addClass("article panel-heading").append(
+                        $('<h4>').text(turkey.reddit),
+                        $('<a>').attr({
+                            "href": "https://reddit.com" + turkey.link,
+                            "target": "_blank"
+                        }).append($("<p>").attr({
+                            "data-id": turkey._id
+                        }).addClass("article").text(turkey.link))
+                    ),
+                    $("<h3>").attr({
+                        "data-id": turkey._id,
+                    }).addClass("article panel-body").text(turkey.title),
+                )
+
+            )
+        })
+    })
+})
